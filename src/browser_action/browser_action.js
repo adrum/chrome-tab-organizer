@@ -55,7 +55,9 @@ function mergeAllWindows() {
           chrome.tabs.move(newOrder, {index: -1, windowId: window.id}, function(){
             closePopover();
           });
-        };
+        } else {
+          closePopover();
+        }
       });
     })
 }
@@ -63,7 +65,10 @@ function mergeAllWindows() {
 function moveToNew() {
   chrome.windows.getCurrent(function(window){
     chrome.tabs.query({windowId: window.id}, function(tabs){
-      if (tabs.length < 2) return;
+      if (tabs.length < 2) {
+        closePopover();
+        return;
+      }
       for (var i in tabs) {
         var tab = tabs[i];
         if (!tab.active) continue;
