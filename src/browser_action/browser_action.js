@@ -63,6 +63,25 @@ function mergeAllWindows() {
 }
 
 function moveToNew() {
+  if (typeof browser != 'undefined') {
+    browser.windows.getCurrent().then(function(window){
+      browser.tabs.query({windowId: window.id}).then(function(tabs){
+        if (tabs.length < 2) {
+          closePopover();
+          return;
+        }
+        for (var i in tabs) {
+          var tab = tabs[i];
+          if (!tab.active) continue;
+          browser.windows.create({tabId: tab.id}).then(function(){
+            closePopover();
+          })
+        }
+      })
+    })
+    return;
+  }
+
   chrome.windows.getCurrent(function(window){
     chrome.tabs.query({windowId: window.id}, function(tabs){
       if (tabs.length < 2) {
@@ -78,7 +97,6 @@ function moveToNew() {
       }
     })
   })
-
 }
 
 document.getElementById("sort-domain") .addEventListener("click", sortByDomain);
