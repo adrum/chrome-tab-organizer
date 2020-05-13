@@ -1,6 +1,6 @@
 # Chrome Tab Organizer
 
-Simple Chrome extension to manage tabs. Offers the follow commands:
+Simple Chrome extension to manage tabs. Offers the following commands:
 
 - Sort By Title
     - Sorts all tabs in the current window by the Title of the page loaded in the tab.
