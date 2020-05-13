@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<style type="text/css">
+  html,
+  body {
+    padding: 0;
+    margin: 0;
+    border-radius: 20px;
+  }
+  #mainPopup {
+    height: 200px;
+    width: 200px;
+    font-family: Arial, Helvetica, Ubuntu, sans-serif;
+  }
+  h1 {
+    font-size: 1.5em;
+    text-align: center;
+  }
+
+  .flex {
+    display: flex;
+    flex-direction: row;
+	padding: 0 1rem;
+  }
+
+  hr {
+
+  }
+
+  img {
+    width: 40px;
+	height: auto;
+	object-fit: contain;
+	border-radius: 20px;
+	border: 1 gray solid;
+  }
+
+  button {
+    width: 100%;
+    display: inline-block;
+    border: none;
+    padding: 0.5rem;
+    margin: 0;
+    text-decoration: none;
+    background: white;
+    color: black;
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-align: left;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+  }
+
+  button:hover,
+  button:focus {
+    background: #c5c5c5;
+  }
+
+  button:focus {
+    outline: 0;
+  }
+</style>
+
+<div id="mainPopup">
+  <div class="flex">
+    <img src="icon128.png" />
+    <h1>TabOrganizer</h1>
+  </div>
+  <hr />
+  <button id="sort-title" title="Case Insensitive">Sort by Title</button>
+  <br />
+  <button id="sort-url" title="Includes subdomains">Sort by Website</button>
+  <br />
+  <button id="sort-domain" title="Excludes subdomains">Sort by Domain</button>
+  <hr />
+  <button id="merge" title="Moves all tabs to this window">Merge all Windows</button>
+  <button id="move-new" title="Moves this tab to new window">Move Tab to New Window</button>
+  <script type="text/javascript" src="browser_action.js"></script>
+</div>
