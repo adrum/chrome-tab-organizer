@@ -1,6 +1,10 @@
 name: Publish Extension
 # This workflow is triggered on pushes to the repository.
-on: [tags]
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 
 jobs:
   publish:
@@ -9,7 +13,22 @@ jobs:
     # This job runs on Linux
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            Changes in this Release
+            - First Change
+            - Second Change
+          draft: false
+          prerelease: false
       - run: rm -Rf .git*
       - run: rm -Rf *.sketch
       - uses: montudor/action-zip@v0.1.0
@@ -17,9 +36,9 @@ jobs:
           args: zip -qq -r ./extension.zip ./
       - uses: Klemensas/chrome-extension-upload-action@$VERSION
         with:
-          refresh-token: $REFRESH_TOKEN
-          client-id: $CLIENT_ID
-          client-secret: $CLIENT_SECRET
+          refresh-token: ${{ secrets.REFRESH_TOKEN }}
+          client-id: ${{ secrets.CLIENT_ID }}
+          client-secret: ${{ secrets.CLIENT_SECRET }}
           file-name: './extension.zip'
-          app-id: $APP_ID
+          app-id: ${{ secrets.APP_ID }}
           publish: true
