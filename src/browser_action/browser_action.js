@@ -14,6 +14,12 @@ function closePopover() {
   window.close();
 }
 
+function getHostname(url) {
+  const a = document.createElement("a");
+  a.href = url;
+  return a.hostname;
+}
+
 function getProp(obj, property) {
   switch (property) {
     case "title":
@@ -22,24 +28,41 @@ function getProp(obj, property) {
       return obj.url.toLowerCase();
     case "domain":
       if (obj.url.toLowerCase().indexOf("http") > -1) {
-        var l = document.createElement("a");
-        l.href = obj.url;
-        var hostname = l.hostname;
-        const hostnameArray = hostname.split(".");
-        const numberOfSubdomains = hostnameArray.length - 2;
-        return hostnameArray.length === 2
-          ? hostname
-          : hostnameArray.slice(numberOfSubdomains).join(".");
+        return obj.url.toLowerCase();
       }
       return obj.title.toLowerCase();
   }
+}
+
+function getDomainPieces(url) {
+  const hostname = getHostname(url);
+  const hostnameArray = hostname.split(".");
+
+  // Stick the TLD and the domain together
+  const rootDomainName = hostnameArray.slice(hostnameArray.length - 2);
+  const subdomainName = hostnameArray.slice(0, hostnameArray.length - 2);
+
+  return [...rootDomainName, ...subdomainName.reverse()];
 }
 
 function sortBy(property) {
   chrome.windows.getCurrent(function (window) {
     chrome.tabs.query({ windowId: window.id }, function (tabs) {
       var newOrder = tabs
-        .sort((a, b) => (getProp(a, property) > getProp(b, property) ? 1 : -1))
+        .sort((a, b) => {
+          const propa = getProp(a, property);
+          const propb = getProp(b, property);
+
+          if (property == "domain") {
+            // Extract hostname, then split by dots, then sort in reverse order
+            const aHostname = getDomainPieces(propa).join(".");
+            const bHostname = getDomainPieces(propb).join(".");
+            console.log(aHostname, bHostname);
+            return aHostname > bHostname ? 1 : -1;
+          }
+
+          return propa > propb ? 1 : -1;
+        })
         .map((t) => t.id);
       chrome.tabs.move(newOrder, { index: 0 }, function () {
         // alert('Tabs Reordered.')
