@@ -7,31 +7,33 @@
     border-radius: 20px;
   }
   #mainPopup {
-    height: 200px;
+    height: 260px;
     width: 200px;
     font-family: Arial, Helvetica, Ubuntu, sans-serif;
   }
+  .img-container {
+    max-width: 99%;
+  }
   h1 {
-    font-size: 1.5em;
+    font-size: 1.3em;
     text-align: center;
   }
 
   .flex {
     display: flex;
     flex-direction: row;
-	padding: 0 1rem;
+    padding: 0 1rem;
   }
 
   hr {
-
   }
 
   img {
-    width: 40px;
-	height: auto;
-	object-fit: contain;
-	border-radius: 20px;
-	border: 1 gray solid;
+    width: 36px;
+    height: auto;
+    object-fit: contain;
+    border-radius: 20px;
+    border: 1 gray solid;
   }
 
   button {
@@ -61,7 +63,7 @@
 </style>
 
 <div id="mainPopup">
-  <div class="flex">
+  <div class="flex img-container">
     <img src="icon128.png" />
     <h1>TabOrganizer</h1>
   </div>
@@ -72,7 +74,11 @@
   <br />
   <button id="sort-domain" title="Excludes subdomains">Sort by Domain</button>
   <hr />
-  <button id="merge" title="Moves all tabs to this window">Merge all Windows</button>
-  <button id="move-new" title="Moves this tab to new window">Move Tab to New Window</button>
+  <button id="merge" title="Moves all tabs to this window">
+    Merge all Windows
+  </button>
+  <button id="move-new" title="Moves this tab to new window">
+    Move Tab to New Window
+  </button>
   <script type="text/javascript" src="browser_action.js"></script>
 </div>
