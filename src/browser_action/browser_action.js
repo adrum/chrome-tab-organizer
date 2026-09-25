@@ -45,31 +45,62 @@ function getDomainPieces(url) {
   return [...rootDomainName, ...subdomainName.reverse()];
 }
 
-function sortBy(property) {
-  chrome.windows.getCurrent(function (window) {
-    chrome.tabs.query({ windowId: window.id }, function (tabs) {
-      var newOrder = tabs
-        .sort((a, b) => {
-          const propa = getProp(a, property);
-          const propb = getProp(b, property);
+function compareTabs(a, b, property) {
+  const propa = getProp(a, property);
+  const propb = getProp(b, property);
 
-          if (property == "domain") {
-            // Extract hostname, then split by dots, then sort in reverse order
-            const aHostname = getDomainPieces(propa).join(".");
-            const bHostname = getDomainPieces(propb).join(".");
-            console.log(aHostname, bHostname);
-            return aHostname > bHostname ? 1 : -1;
-          }
+  if (property == "domain") {
+    // Extract hostname, then split by dots, then sort in reverse order
+    const aHostname = getDomainPieces(propa).join(".");
+    const bHostname = getDomainPieces(propb).join(".");
+    return aHostname > bHostname ? 1 : -1;
+  }
 
-          return propa > propb ? 1 : -1;
-        })
-        .map((t) => t.id);
-      chrome.tabs.move(newOrder, { index: 0 }, function () {
-        // alert('Tabs Reordered.')
-        closePopover();
-      });
-    });
-  });
+  return propa > propb ? 1 : -1;
+}
+
+function getSectionKey(tab) {
+  if (tab.pinned) return "pinned";
+  return tab.groupId !== undefined ? tab.groupId : -1;
+}
+
+// Split tabs (in index order) into contiguous sections: pinned tabs, each tab
+// group, and each run of ungrouped tabs are handled independently.
+function getSections(tabs) {
+  const sections = [];
+  let current = null;
+  for (const tab of tabs) {
+    const key = getSectionKey(tab);
+    if (!current || current.key !== key) {
+      current = { key, groupId: tab.groupId, start: tab.index, tabs: [] };
+      sections.push(current);
+    }
+    current.tabs.push(tab);
+  }
+  return sections;
+}
+
+async function sortBy(property) {
+  const window = await chrome.windows.getCurrent();
+  const tabs = await chrome.tabs.query({ windowId: window.id });
+  tabs.sort((a, b) => a.index - b.index);
+
+  for (const section of getSections(tabs)) {
+    // Pinned tabs are deliberately ordered, so leave them alone
+    if (section.key === "pinned" || section.tabs.length < 2) continue;
+
+    const newOrder = section.tabs
+      .sort((a, b) => compareTabs(a, b, property))
+      .map((t) => t.id);
+    await chrome.tabs.move(newOrder, { index: section.start });
+
+    // Moving can pull tabs at the group's edges out of it, so re-apply the group
+    if (section.groupId > -1) {
+      await chrome.tabs.group({ groupId: section.groupId, tabIds: newOrder });
+    }
+  }
+
+  closePopover();
 }
 
 function mergeAllWindows() {
