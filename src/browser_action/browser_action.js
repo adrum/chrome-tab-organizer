@@ -30,6 +30,10 @@ function normalizeUrl(url) {
     .replace(/^https:\/\/www\./, "https://");
 }
 
+function isWebUrl(url) {
+  return /^https?:\/\//.test(url);
+}
+
 function getProp(obj, property) {
   switch (property) {
     case "title":
@@ -37,10 +41,7 @@ function getProp(obj, property) {
     case "url":
       return normalizeUrl(obj.url);
     case "domain":
-      if (obj.url.toLowerCase().indexOf("http") > -1) {
-        return obj.url.toLowerCase();
-      }
-      return obj.title.toLowerCase();
+      return normalizeUrl(obj.url);
   }
 }
 
@@ -60,6 +61,13 @@ function compareTabs(a, b, property) {
   const propb = getProp(b, property);
 
   if (property == "domain") {
+    // Web tabs come first, sorted by domain; other tabs (file:, chrome:, ...)
+    // follow, sorted by their full URL
+    const aIsWeb = isWebUrl(propa);
+    const bIsWeb = isWebUrl(propb);
+    if (aIsWeb !== bIsWeb) return aIsWeb ? -1 : 1;
+    if (!aIsWeb) return propa > propb ? 1 : -1;
+
     // Extract hostname, then split by dots, then sort in reverse order
     const aHostname = getDomainPieces(propa).join(".");
     const bHostname = getDomainPieces(propb).join(".");
