@@ -20,12 +20,18 @@ function getHostname(url) {
   return a.hostname;
 }
 
+// Treat http and https as the same scheme so web tabs sort together, while
+// other schemes (file:, chrome:, ...) still group naturally by name
+function normalizeUrl(url) {
+  return url.toLowerCase().replace(/^http:/, "https:");
+}
+
 function getProp(obj, property) {
   switch (property) {
     case "title":
       return obj.title.toLowerCase();
     case "url":
-      return obj.url.toLowerCase();
+      return normalizeUrl(obj.url);
     case "domain":
       if (obj.url.toLowerCase().indexOf("http") > -1) {
         return obj.url.toLowerCase();
