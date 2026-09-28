@@ -45,13 +45,39 @@ function getProp(obj, property) {
   }
 }
 
+// Second-level labels commonly used under country-code TLDs (bbc.co.uk,
+// example.com.au), so the registrable domain spans three labels
+const SECOND_LEVEL_LABELS = new Set([
+  "ac",
+  "co",
+  "com",
+  "edu",
+  "gov",
+  "net",
+  "org",
+]);
+
+function getRootDomainLength(hostnameArray) {
+  const tld = hostnameArray[hostnameArray.length - 1];
+  const secondLevel = hostnameArray[hostnameArray.length - 2];
+  if (
+    hostnameArray.length >= 3 &&
+    tld.length === 2 &&
+    SECOND_LEVEL_LABELS.has(secondLevel)
+  ) {
+    return 3;
+  }
+  return 2;
+}
+
 function getDomainPieces(url) {
   const hostname = getHostname(url);
   const hostnameArray = hostname.split(".");
+  const rootLength = getRootDomainLength(hostnameArray);
 
   // Stick the TLD and the domain together
-  const rootDomainName = hostnameArray.slice(hostnameArray.length - 2);
-  const subdomainName = hostnameArray.slice(0, hostnameArray.length - 2);
+  const rootDomainName = hostnameArray.slice(-rootLength);
+  const subdomainName = hostnameArray.slice(0, -rootLength);
 
   return [...rootDomainName, ...subdomainName.reverse()];
 }
