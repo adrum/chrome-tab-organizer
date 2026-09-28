@@ -82,25 +82,40 @@ function getDomainPieces(url) {
   return [...rootDomainName, ...subdomainName.reverse()];
 }
 
-function compareTabs(a, b, property) {
-  const propa = getProp(a, property);
-  const propb = getProp(b, property);
+function compareStrings(a, b) {
+  if (a === b) return 0;
+  return a > b ? 1 : -1;
+}
 
+function comparePrimary(propa, propb, property) {
   if (property == "domain") {
     // Web tabs come first, sorted by domain; other tabs (file:, chrome:, ...)
     // follow, sorted by their full URL
     const aIsWeb = isWebUrl(propa);
     const bIsWeb = isWebUrl(propb);
     if (aIsWeb !== bIsWeb) return aIsWeb ? -1 : 1;
-    if (!aIsWeb) return propa > propb ? 1 : -1;
+    if (!aIsWeb) return compareStrings(propa, propb);
 
     // Extract hostname, then split by dots, then sort in reverse order
     const aHostname = getDomainPieces(propa).join(".");
     const bHostname = getDomainPieces(propb).join(".");
-    return aHostname > bHostname ? 1 : -1;
+    return compareStrings(aHostname, bHostname);
   }
 
-  return propa > propb ? 1 : -1;
+  return compareStrings(propa, propb);
+}
+
+function compareTabs(a, b, property) {
+  const primary = comparePrimary(
+    getProp(a, property),
+    getProp(b, property),
+    property
+  );
+  if (primary !== 0) return primary;
+
+  // Break ties by full URL; tabs that still match keep their current order
+  // since the sort is stable
+  return compareStrings(normalizeUrl(a.url), normalizeUrl(b.url));
 }
 
 function getSectionKey(tab) {
