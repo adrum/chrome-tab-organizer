@@ -17,13 +17,17 @@ function closePopover() {
 function getHostname(url) {
   const a = document.createElement("a");
   a.href = url;
-  return a.hostname;
+  return a.hostname.replace(/^www\./, "");
 }
 
 // Treat http and https as the same scheme so web tabs sort together, while
-// other schemes (file:, chrome:, ...) still group naturally by name
+// other schemes (file:, chrome:, ...) still group naturally by name. A leading
+// www. is dropped so it sorts with the bare domain.
 function normalizeUrl(url) {
-  return url.toLowerCase().replace(/^http:/, "https:");
+  return url
+    .toLowerCase()
+    .replace(/^http:/, "https:")
+    .replace(/^https:\/\/www\./, "https://");
 }
 
 function getProp(obj, property) {
